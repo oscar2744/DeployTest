@@ -20,8 +20,8 @@ const restSch = mongoose.Schema({
 	"street": String,
 	"building": String,
 	"zipcode": Number,
-	coord:{"GPS(lon)": Number,
-	       "GPS(lat)": Number}
+	coord:{"lon": Number,
+	       "lat": Number}
 },
 	img: {
 		data: Buffer,
@@ -137,8 +137,39 @@ const handle_search = (res,req) => {
 
     });
 }
+  
+const handle_rate=(res,req)=>{
+const client = new MongoClient(mongourl);
+ 
+               client.connect((err) => {
+                assert.equal(null, err);
+                const db = client.db(dbName);
+		console.log(req.body);
+		console.log(res.body);
+		console.log(req.query);
+		console.log(res.query);
+                let data = db.collection('rests').find(req.body.restaurant_id,{grades:{$elemMatch:{user:req.session.username}}});
 
-
+                data.toArray((err,docs) => {
+                assert.equal(err,null);
+                client.close;
+                });
+                if(data != null) {
+                    var ratedoc = {};
+                    ratedoc['user'] = req.session.username;
+                    ratedoc['score'] = req.body.score;
+                    db.collection('rests').updateOne(req.query._id, {$push: {grades: ratedoc}})
+                    console.log('rate success!');
+                    res.status(200).end('create successful');
+                }
+                else {
+                res.status(200).render('error',{});
+                }
+                });
+}
+app.post('/rate',(req,res)=>{
+	handle_rate(res,req);
+});
 
 app.get('/read', (req,res)=> {
 	handle_show(res,req);
@@ -232,8 +263,8 @@ app.post('/create', function(req,res) {
 			"building": req.body.building,
 			"zipcode": req.body.zipcode,
 			"coord":{
-				"GPS(lon)": req.body.lon,
-				"GPS(lat)": req.body.lat,
+				"lon": req.body.lon,
+				"lat": req.body.lat,
 				}
 			},
 		"img": {
@@ -257,11 +288,83 @@ app.post('/create', function(req,res) {
 	});
 });
 
+
+
 app.post('/search', (req,res) => {
-	restaurant_id = req.body.restaurant_id;
 	handle_search(res,req);
 	
 });
+
+
+
+app.get('/rate' , (req,res) => {
+    res.status(200).render('rate',{});
+});
+
+
+
+app.get('/api/rests/name/:name', (req,res) => {
+    if (req.params.name) {
+        let criteria = {};
+        criteria['name'] = req.params.name;
+        const client = new MongoClient(mongourl);
+        client.connect((err) => {
+            assert.equal(null, err);
+            console.log("Connected successfully to server");
+            const db = client.db(dbName);
+
+            findrestaurant(db, criteria, (docs) => {
+                client.close();
+                console.log("Closed DB connection");
+                res.status(200).json(docs);
+            });
+        });
+    } else {
+        res.status(500).json({"error": "missing name"});
+    }
+})
+
+app.get('/api/rests/borough/:borough', (req,res) => {
+    if (req.params.borough) {
+        let criteria = {};
+        criteria['borough'] = req.params.borough;
+        const client = new MongoClient(mongourl);
+        client.connect((err) => {
+            assert.equal(null, err);
+            console.log("Connected successfully to server");
+            const db = client.db(dbName);
+
+            findrestaurant(db, criteria, (docs) => {
+                client.close();
+                console.log("Closed DB connection");
+                res.status(200).json(docs);
+            });
+        });
+    } else {
+        res.status(500).json({"error": "missing borough"});
+    }
+})
+
+app.get('/api/rests/cuisine/:cuisine', (req,res) => {
+    if (req.params.cuisine) {
+        let criteria = {};
+        criteria['cuisine'] = req.params.cuisine;
+        const client = new MongoClient(mongourl);
+        client.connect((err) => {
+            assert.equal(null, err);
+            console.log("Connected successfully to server");
+            const db = client.db(dbName);
+
+            findrestaurant(db, criteria, (docs) => {
+                client.close();
+                console.log("Closed DB connection");
+                res.status(200).json(docs);
+            });
+        });
+    } else {
+        res.status(500).json({"error": "missing cuisine"});
+    }
+})
 
 
 

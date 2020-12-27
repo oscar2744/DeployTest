@@ -12,7 +12,7 @@
 <%if (source[0].photo !="") {%>
 	<img src="data:image/png;base64, <%= source[0].img.data %>"><br>
 <%}%>
-
+            <a href="/rate?restaurant_id=<%=source[0]._id %>"><button type="button">Rate</button></a>
 <table>
          <tr><th><H2><%= source[0].name %></H2></th></tr>
 
@@ -60,9 +60,11 @@
                                  </td>
                               </tr>
  <%}%>
-
+				<%if(source[0].address.coord.lon)%>
+					<td>GPS:[<%=source[0].address.coord.lon%>,<%= source[0].address.coord.lat%>]<td>
+					
                 			<tr>
-                                             <td>Owner:</td>
+                                             <td>Created by:</td>
                                              <td>
                                                 <%= source[0].owner %>
                                              </td>
