@@ -62,7 +62,12 @@
  <%}%>
 				<%if(source[0].address.coord.lon)%>
 					<td>GPS:[<%=source[0].address.coord.lon%>,<%= source[0].address.coord.lat%>]<td>
-					
+					<tr></tr>
+				<td>Rating:</td>
+				<ul style="list-style-type:disc">
+					<%if(source[0].grades)%>
+  					<li><td><%=source[0].grades.user%>:<%=source[0].grades.score%></li>
+					</ul>
                 			<tr>
                                              <td>Created by:</td>
                                              <td>
