@@ -12,7 +12,8 @@
 <%if (source[0].photo !="") {%>
 	<img src="data:image/png;base64, <%= source[0].img.data %>"><br>
 <%}%>
-            <a href="/rate?restaurant_id=<%=source[0]._id %>"><button type="button">Rate</button></a>
+            <a href="/rate?id=<%=source[0]._id %>"><button type="button">Rate</button></a>
+		 <a href="/delete?id=<%=source[0]._id %>"><button type="button">Delete</button></a>
 <table>
          <tr><th><H2><%= source[0].name %></H2></th></tr>
 
@@ -63,11 +64,13 @@
 				<%if(source[0].address.coord.lon)%>
 					<td>GPS:[<%=source[0].address.coord.lon%>,<%= source[0].address.coord.lat%>]<td>
 					<tr></tr>
+			
 				<td>Rating:</td>
-				<ul style="list-style-type:disc">
-					<%if(source[0].grades)%>
-  					<li><td><%=source[0].grades.user%>:<%=source[0].grades.score%></li>
-					</ul>
+					<%for(var i =0; i< source[0].grades.length;i++){%>
+  					<tr><td><%=source[0].grades[i].user%> : <%=source[0].grades[i].score%></td></tr>
+					
+				<%}%>
+					
                 			<tr>
                                              <td>Created by:</td>
                                              <td>

@@ -26,9 +26,9 @@ const restSch = mongoose.Schema({
 	img: {
 		data: Buffer,
 		contentType: String},
-	grades:{
+	grades:[{
 		user:String,
-		score: Number},
+		score: Number}],
 	"owner":String
 	});
 
@@ -139,38 +139,8 @@ const handle_search = (res,req) => {
     });
 }
   
-const handle_rate=(res,req)=>{
-const client = new MongoClient(mongourl);
- 
-               client.connect((err) => {
-                assert.equal(null, err);
-                const db = client.db(dbName);
-		console.log(req.body);
-		console.log(res.body);
-		console.log(req.query);
-		console.log(res.query);
-                let data = db.collection('rests').find(req.body.restaurant_id,{grades:{$elemMatch:{user:req.session.username}}});
 
-                data.toArray((err,docs) => {
-                assert.equal(err,null);
-                client.close;
-                });
-                if(data != null) {
-                    var ratedoc = {};
-                    ratedoc['user'] = req.session.username;
-                    ratedoc['score'] = req.body.score;
-                    db.collection('rests').updateOne(req.query._id, {$push: {grades: ratedoc}})
-                    console.log('rate success!');
-                    res.status(200).end('create successful');
-                }
-                else {
-                res.status(200).render('error',{});
-                }
-                });
-}
-app.post('/rate',(req,res)=>{
-	handle_rate(res,req);
-});
+
 
 app.get('/read', (req,res)=> {
 	handle_show(res,req);
@@ -189,6 +159,8 @@ app.get('/details', (req,res) => {
 	}
 });
 
+
+/*
 app.get('/', (req,res) => {
 	console.log(req.session);
 	handle_show(req,res);
@@ -198,6 +170,8 @@ app.get('/', (req,res) => {
 		res.status(200).render('list',{source: docs,criteria:JSON.stringify({})});
 	}
 });
+*/
+
 
 app.get('/login', (req,res) => {
 	res.status(200).render('login',{});
@@ -273,10 +247,10 @@ app.post('/create', function(req,res) {
 			"contentType": 'image/png'
 			},
 		"owner": req.session.username,
-		"grades":{
+		"grades":[{
 			"user":"",
 			"score":0
-			}
+			}]
                 
 		});
 		obj.save((err) => {
@@ -362,6 +336,72 @@ app.get('/api/rests/cuisine/:cuisine', (req,res) => {
 })
 
 
+
+app.get('/rate' , (req,res) => {
+    res.status(200).render('rate',{id:req.query.id});
+});
+
+
+app.post('/rate' , (req,res) => {
+                console.log(id);
+                const client = new MongoClient(mongourl);
+                client.connect((err) => {
+                assert.equal(null, err);
+                const db = client.db(dbName);
+                //var doc = {};
+                //doc['_id'] = id;
+                //doc['grades'] = {$elemMatch:{user:req.session.username}};
+                var un = req.session.username;
+                let data = db.collection('rests').find({_id:id, grades: {$elemMatch: {user:un}}},{_id: 1,grades: {$elemMatch: {user:un}}});
+                data.toArray((err,docs) => {
+                assert.equal(err,null);
+                client.close;
+                console.log(docs);
+               if(docs[0] != null) {
+                    res.status(200).render('error',{});
+                }
+               else {
+                var ratedoc = {};
+                    ratedoc['user'] = req.session.username;
+                    ratedoc['score'] = req.body.score;
+		    console.log(ratedoc);
+                    db.collection('rests').updateOne({_id:id}, {$push: {grades: ratedoc}})
+		    console.log(id);
+                    console.log('rate success!');
+                    res.status(200).end('create successful');
+                }
+                });
+        });
+
+});
+
+
+app.get('/delete', (req,res) => {
+    const client = new MongoClient(mongourl); 
+    client.connect((err) => {
+        assert.equal(null,err);
+        const db = client.db(dbName);
+        let criteria = {};
+        console.log(req.query.id);
+        criteria['_id'] = new ObjectID(req.query.id);
+
+        let data = db.collection('rests').find(criteria,{owner: 1});
+        data.toArray((err,docs) => {
+        console.log(docs);
+        if(docs[0].owner == req.session.username){
+	    console.log(criteria);
+            db.collection('rests').deleteOne(criteria, (err,results) => {
+            assert.equal(err,null);
+            client.close();
+            res.status(200).render('delete',{});
+                });
+            }
+        else{
+            res.status(200).render('delete2',{});
+        }
+        });
+    });
+});
 
 app.listen(process.env.PORT || 8099);
 
