@@ -319,9 +319,7 @@ app.get('/api/rests/name/:name', (req,res) => {
                 res.status(200).json(docs);
             });
         });
-    } else {
-        res.status(500).json({"error": "missing name"});
-    }
+    } 
 })
 
 app.get('/api/rests/borough/:borough', (req,res) => {
@@ -340,9 +338,7 @@ app.get('/api/rests/borough/:borough', (req,res) => {
                 res.status(200).json(docs);
             });
         });
-    } else {
-        res.status(500).json({"error": "missing borough"});
-    }
+    } 
 })
 
 app.get('/api/rests/cuisine/:cuisine', (req,res) => {
@@ -361,9 +357,7 @@ app.get('/api/rests/cuisine/:cuisine', (req,res) => {
                 res.status(200).json(docs);
             });
         });
-    } else {
-        res.status(500).json({"error": "missing cuisine"});
-    }
+    } 
 })
 
 
