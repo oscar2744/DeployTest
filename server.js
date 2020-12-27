@@ -257,7 +257,7 @@ app.post('/create', function(req,res) {
 			if (err) throw err 
 			console.log('create successful!')
 			db.close();
-			res.status(200).end('create successful');
+			res.status(200).render('success',{});
 			});
 		});
 	});
@@ -368,7 +368,7 @@ app.post('/rate' , (req,res) => {
                     db.collection('rests').updateOne({_id:id}, {$push: {grades: ratedoc}})
 		    console.log(id);
                     console.log('rate success!');
-                    res.status(200).end('create successful');
+                    res.status(200).render('success',{});
                 }
                 });
         });
